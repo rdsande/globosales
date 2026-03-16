@@ -1,0 +1,110 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>API Test</title>
+    <style>
+        body { font-family: Arial, sans-serif; padding: 20px; max-width: 800px; margin: 0 auto; }
+        .result { background: #f5f5f5; padding: 15px; border-radius: 5px; margin: 10px 0; }
+        .success { background: #d4edda; border: 1px solid #c3e6cb; }
+        .error { background: #f8d7da; border: 1px solid #f5c6cb; }
+        pre { white-space: pre-wrap; word-wrap: break-word; }
+    </style>
+</head>
+<body>
+    <h1>Strapi API Test</h1>
+    <button onclick="testAPI()">Test API Connection</button>
+    <div id="results"></div>
+
+    <script>
+        async function testAPI() {
+            const resultsDiv = document.getElementById('results');
+            resultsDiv.innerHTML = '<p>Testing...</p>';
+            
+            let html = '';
+            
+            // Test 1: Categories
+            try {
+                const catResponse = await fetch('http://localhost:1337/api/categories?populate=*');
+                const catData = await catResponse.json();
+                
+                const hasFeaturedField = catData.data?.[0]?.attributes?.featured !== undefined;
+                const featuredCount = catData.data?.filter(c => c.attributes?.featured === true).length || 0;
+                
+                html += `
+                    <div class="result ${catResponse.ok ? 'success' : 'error'}">
+                        <h3>📁 Categories API</h3>
+                        <p><strong>Status:</strong> ${catResponse.status}</p>
+                        <p><strong>Total categories:</strong> ${catData.data?.length || 0}</p>
+                        <p><strong>Has 'featured' field:</strong> ${hasFeaturedField ? '✅ Yes' : '❌ No - Restart Strapi!'}</p>
+                        <p><strong>Featured categories:</strong> ${featuredCount}</p>
+                        ${catData.data?.length > 0 ? `
+                            <h4>First category:</h4>
+                            <pre>${JSON.stringify(catData.data[0], null, 2)}</pre>
+                        ` : ''}
+                    </div>
+                `;
+            } catch (error) {
+                html += `
+                    <div class="result error">
+                        <h3>❌ Categories API Failed</h3>
+                        <p>${error.message}</p>
+                    </div>
+                `;
+            }
+            
+            // Test 2: Products
+            try {
+                const prodResponse = await fetch('http://localhost:1337/api/products?populate=*&pagination[pageSize]=5');
+                const prodData = await prodResponse.json();
+                
+                html += `
+                    <div class="result ${prodResponse.ok ? 'success' : 'error'}">
+                        <h3>📦 Products API</h3>
+                        <p><strong>Status:</strong> ${prodResponse.status}</p>
+                        <p><strong>Products found:</strong> ${prodData.data?.length || 0}</p>
+                        <p><strong>Total:</strong> ${prodData.meta?.pagination?.total || 0}</p>
+                    </div>
+                `;
+            } catch (error) {
+                html += `
+                    <div class="result error">
+                        <h3>❌ Products API Failed</h3>
+                        <p>${error.message}</p>
+                    </div>
+                `;
+            }
+            
+            // Test 3: Featured categories filter
+            try {
+                const featResponse = await fetch('http://localhost:1337/api/categories?filters[featured][$eq]=true&populate=*');
+                const featData = await featResponse.json();
+                
+                html += `
+                    <div class="result ${featResponse.ok ? 'success' : 'error'}">
+                        <h3>⭐ Featured Categories Filter</h3>
+                        <p><strong>Status:</strong> ${featResponse.status}</p>
+                        <p><strong>Featured categories:</strong> ${featData.data?.length || 0}</p>
+                        ${featData.data?.length > 0 ? `
+                            <p><strong>Categories:</strong> ${featData.data.map(c => c.attributes?.name).join(', ')}</p>
+                        ` : '<p><em>No categories marked as featured yet. Go to Strapi admin to mark some!</em></p>'}
+                    </div>
+                `;
+            } catch (error) {
+                html += `
+                    <div class="result error">
+                        <h3>❌ Featured Filter Failed</h3>
+                        <p>${error.message}</p>
+                    </div>
+                `;
+            }
+            
+            resultsDiv.innerHTML = html;
+        }
+        
+        // Auto-run on load
+        window.addEventListener('DOMContentLoaded', testAPI);
+    </script>
+</body>
+</html>

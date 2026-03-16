@@ -1,0 +1,181 @@
+<!doctype html>
+<html lang="en" class="color-two">
+<head>
+    <meta charset="UTF-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Shop - Globosales Agricultural Marketplace</title>
+    <link rel="shortcut icon" href="assets/images/logo/favicon.png" />
+    
+    <!-- CSS -->
+    <link rel="stylesheet" href="assets/css/bootstrap.min.css" />
+    <link rel="stylesheet" href="assets/css/select2.min.css" />
+    <link rel="stylesheet" href="assets/css/slick.css" />
+    <link rel="stylesheet" href="assets/css/jquery-ui.css" />
+    <link rel="stylesheet" href="assets/css/main.css" />
+    
+    <style>
+        .logo-dark { display: block; }
+        .logo-light { display: none; }
+        .header-nav { background: #2d7a3e !important; }
+        .btn-main { background: #2d7a3e !important; border-color: #2d7a3e !important; }
+        .text-main-600 { color: #2d7a3e !important; }
+        .bg-main-600 { background: #2d7a3e !important; }
+        .category-dropdown__button { background: #1e5a2b; padding: 12px 24px; border: none; color: white; }
+        .category-list { list-style: none; padding: 0; margin: 0; }
+        .category-list__item { border-bottom: 1px solid #f0f0f0; }
+        .category-list__link { display: flex; align-items: center; padding: 12px 16px; color: #333; text-decoration: none; transition: all 0.3s; }
+        .category-list__link:hover { background: #f8f9fa; color: #2d7a3e; }
+    </style>
+</head>
+<body>
+    <!-- Preloader -->
+    <div class="preloader">
+        <img src="assets/images/icon/preloader.gif" alt="" />
+    </div>
+
+    <!-- Scroll to Top -->
+    <div class="progress-wrap">
+        <svg class="progress-circle svg-content" width="100%" height="100%" viewBox="-1 -1 102 102">
+            <path d="M50,1 a49,49 0 0,1 0,98 a49,49 0 0,1 0,-98" />
+        </svg>
+    </div>
+
+    <!-- Header Placeholder -->
+    <div id="header-placeholder"></div>
+
+    <!-- Breadcrumb -->
+    <div class="breadcrumb py-26 bg-color-one">
+        <div class="container container-lg">
+            <div class="breadcrumb-wrapper flex-between flex-wrap gap-16">
+                <h6 class="mb-0">Shop</h6>
+                <ul class="flex-align gap-8 flex-wrap">
+                    <li class="text-sm"><a href="index.html" class="text-gray-900 flex-align gap-8 hover-text-main-600"><i class="ph ph-house"></i> Home</a></li>
+                    <li class="flex-align"><i class="ph ph-caret-right"></i></li>
+                    <li class="text-sm text-main-600">Shop</li>
+                </ul>
+            </div>
+        </div>
+    </div>
+
+    <!-- Shop Section -->
+    <section class="shop py-80">
+        <div class="container container-lg">
+            <div class="row">
+                <!-- Sidebar -->
+                <div class="col-lg-3">
+                    <div class="shop-sidebar">
+                        <!-- Categories Widget -->
+                        <div class="shop-sidebar__box border border-gray-100 rounded-8 p-32 mb-32">
+                            <h6 class="text-xl border-bottom border-gray-100 pb-24 mb-24">Product Categories</h6>
+                            <div id="sidebarCategories">
+                                <div class="text-center py-3">
+                                    <div class="spinner-border spinner-border-sm" role="status"></div>
+                                    <p class="text-sm mt-2">Loading...</p>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Price Filter -->
+                        <div class="shop-sidebar__box border border-gray-100 rounded-8 p-32 mb-32">
+                            <h6 class="text-xl border-bottom border-gray-100 pb-24 mb-24">Filter by Price</h6>
+                            <div class="custom-range">
+                                <div id="slider-range" class="ui-slider"></div>
+                                <div class="flex-between flex-wrap-reverse gap-8 mt-24">
+                                    <button type="button" class="btn btn-main py-6 px-24 rounded-pill">Filter</button>
+                                    <div class="custom-range__content flex-align gap-8">
+                                        <span class="text-gray-500 text-sm">Price:</span>
+                                        <input type="text" id="amount" class="custom-range__value border-0 text-sm" readonly>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Products Grid -->
+                <div class="col-lg-9">
+                    <!-- Toolbar -->
+                    <div class="flex-between gap-16 flex-wrap mb-40">
+                        <span class="text-gray-900 d-sm-flex d-none">Showing <span id="productCount">0</span> results</span>
+                        <div class="flex-align gap-16 flex-wrap">
+                            <div class="flex-align gap-8">
+                                <span class="text-gray-900 text-sm">Sort by:</span>
+                                <select class="form-select form-select-sm w-auto" id="sortSelect">
+                                    <option value="newest">Newest</option>
+                                    <option value="price-low">Price: Low to High</option>
+                                    <option value="price-high">Price: High to Low</option>
+                                    <option value="name">Name: A to Z</option>
+                                </select>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Products Grid -->
+                    <div class="row g-4 list-grid-wrapper">
+                        <!-- Products will be loaded here dynamically -->
+                    </div>
+
+                    <!-- Pagination -->
+                    <div class="pagination-wrapper mt-40" id="paginationWrapper" style="display: none;">
+                        <ul class="pagination flex-center flex-wrap gap-16">
+                            <!-- Pagination will be generated here -->
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Footer Placeholder -->
+    <div id="footer-placeholder"></div>
+
+    <!-- Scripts -->
+    <script src="assets/js/jquery-3.7.1.min.js"></script>
+    <script src="assets/js/boostrap.bundle.min.js"></script>
+    <script src="assets/js/phosphor-icon.js"></script>
+    <script src="assets/js/select2.min.js"></script>
+    <script src="assets/js/slick.min.js"></script>
+    <script src="assets/js/count-down.js"></script>
+    <script src="assets/js/jquery-ui.js"></script>
+    <script src="assets/js/main.js"></script>
+    
+    <!-- Strapi API Integration -->
+    <script src="assets/js/strapi-api.js"></script>
+    <script src="assets/js/load-components.js"></script>
+    <script src="assets/js/shop.js"></script>
+
+    <script>
+    // Load sidebar categories
+    async function loadSidebarCategories() {
+        try {
+            const categories = await StrapiAPI.getCategories();
+            const sidebar = document.getElementById('sidebarCategories');
+            
+            if (categories.data && categories.data.length > 0) {
+                sidebar.innerHTML = `
+                    <ul class="max-h-540 overflow-y-auto scroll-sm">
+                        ${categories.data.map(cat => {
+                            const attrs = cat.attributes || cat;
+                            const name = attrs.name || cat.name;
+                            const slug = attrs.slug || cat.slug;
+                            return `
+                                <li class="mb-16">
+                                    <a href="shop-new.html?category=${slug}" class="text-gray-900 hover-text-main-600">
+                                        <i class="ph ph-caret-right"></i> ${name}
+                                    </a>
+                                </li>
+                            `;
+                        }).join('')}
+                    </ul>
+                `;
+            }
+        } catch (error) {
+            console.error('Error loading sidebar categories:', error);
+        }
+    }
+
+    document.addEventListener('DOMContentLoaded', loadSidebarCategories);
+    </script>
+</body>
+</html>

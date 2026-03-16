@@ -1,0 +1,211 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Globosales - Admin Dashboard</title>
+    <link rel="stylesheet" href="assets/css/bootstrap.min.css">
+    <link rel="stylesheet" href="assets/css/main.css">
+    <style>
+        .dashboard-container {
+            max-width: 1400px;
+            margin: 50px auto;
+            padding: 20px;
+        }
+        .stat-card {
+            background: white;
+            border-radius: 10px;
+            padding: 25px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+            margin-bottom: 20px;
+        }
+        .stat-card h3 {
+            margin: 0 0 10px 0;
+            color: #666;
+            font-size: 14px;
+            text-transform: uppercase;
+        }
+        .stat-card .value {
+            font-size: 32px;
+            font-weight: bold;
+            color: #333;
+        }
+        .quick-actions {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 15px;
+            margin-top: 30px;
+        }
+        .action-btn {
+            padding: 20px;
+            text-align: center;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border-radius: 10px;
+            text-decoration: none;
+            transition: transform 0.2s;
+        }
+        .action-btn:hover {
+            transform: translateY(-3px);
+            color: white;
+        }
+        .recent-products {
+            margin-top: 40px;
+        }
+        .product-row {
+            background: white;
+            padding: 15px;
+            margin-bottom: 10px;
+            border-radius: 8px;
+            display: flex;
+            align-items: center;
+            gap: 15px;
+            box-shadow: 0 1px 5px rgba(0,0,0,0.1);
+        }
+        .product-row img {
+            width: 60px;
+            height: 60px;
+            object-fit: cover;
+            border-radius: 5px;
+        }
+    </style>
+</head>
+<body>
+    <div class="dashboard-container">
+        <h1>Globosales Admin Dashboard</h1>
+        <p class="text-gray-600 mb-4">Welcome! Manage your multivendor marketplace</p>
+
+        <div class="row">
+            <div class="col-md-3">
+                <div class="stat-card">
+                    <h3>Total Products</h3>
+                    <div class="value" id="totalProducts">-</div>
+                </div>
+            </div>
+            <div class="col-md-3">
+                <div class="stat-card">
+                    <h3>Total Vendors</h3>
+                    <div class="value" id="totalVendors">-</div>
+                </div>
+            </div>
+            <div class="col-md-3">
+                <div class="stat-card">
+                    <h3>Categories</h3>
+                    <div class="value" id="totalCategories">-</div>
+                </div>
+            </div>
+            <div class="col-md-3">
+                <div class="stat-card">
+                    <h3>Published</h3>
+                    <div class="value" id="publishedProducts">-</div>
+                </div>
+            </div>
+        </div>
+
+        <div class="quick-actions">
+            <a href="http://localhost:1337/admin" target="_blank" class="action-btn">
+                <h4>🎛️ Strapi Admin</h4>
+                <p style="font-size: 12px; margin: 5px 0 0 0;">Manage Content</p>
+            </a>
+            <a href="shop.html" class="action-btn" style="background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);">
+                <h4>🛍️ View Shop</h4>
+                <p style="font-size: 12px; margin: 5px 0 0 0;">Customer View</p>
+            </a>
+            <a href="http://localhost:1337/api/products?populate=*" target="_blank" class="action-btn" style="background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);">
+                <h4>🔌 API Docs</h4>
+                <p style="font-size: 12px; margin: 5px 0 0 0;">View API Response</p>
+            </a>
+            <a href="#" onclick="refreshStats(); return false;" class="action-btn" style="background: linear-gradient(135deg, #43e97b 0%, #38f9d7 100%);">
+                <h4>🔄 Refresh Stats</h4>
+                <p style="font-size: 12px; margin: 5px 0 0 0;">Update Dashboard</p>
+            </a>
+        </div>
+
+        <div class="recent-products">
+            <h2>Recent Products</h2>
+            <div id="recentProductsList"></div>
+        </div>
+    </div>
+
+    <script src="assets/js/strapi-api.js"></script>
+    <script>
+        async function loadDashboardStats() {
+            try {
+                console.log('Loading dashboard stats...');
+                const [products, vendors, categories] = await Promise.all([
+                    StrapiAPI.getProducts({ pageSize: 100 }),
+                    StrapiAPI.getVendors(),
+                    StrapiAPI.getCategories()
+                ]);
+
+                console.log('Products response:', products);
+                console.log('Vendors response:', vendors);
+                console.log('Categories response:', categories);
+
+                document.getElementById('totalProducts').textContent = products.meta?.pagination?.total || products.data?.length || 0;
+                document.getElementById('totalVendors').textContent = vendors.data?.length || 0;
+                document.getElementById('totalCategories').textContent = categories.data?.length || 0;
+                
+                const published = products.data?.filter(p => {
+                    const attrs = p.attributes || p;
+                    return attrs.publishedAt;
+                }).length || 0;
+                document.getElementById('publishedProducts').textContent = published;
+
+                const recentProducts = products.data?.slice(0, 5) || [];
+                const productsList = document.getElementById('recentProductsList');
+                
+                if (recentProducts.length === 0) {
+                    productsList.innerHTML = '<p class="text-center text-gray-500 py-5">No products yet. Add products in Strapi Admin!</p>';
+                } else {
+                    productsList.innerHTML = recentProducts.map(product => {
+                        const attrs = product.attributes || product;
+                        const title = attrs.title || product.title || 'Untitled';
+                        const price = attrs.price || product.price || 0;
+                        const stock = attrs.stock || product.stock || 0;
+                        const publishedAt = attrs.publishedAt || product.publishedAt;
+                        
+                        const image = attrs.images?.data?.[0];
+                        const imageUrl = image ? StrapiAPI.getImageUrl(image.attributes) : 'assets/images/thumbs/product-two-img1.png';
+                        
+                        // Handle vendor name from different possible structures
+                        let vendorName = 'No vendor';
+                        if (attrs.vendor?.data) {
+                            vendorName = attrs.vendor.data.attributes?.name || attrs.vendor.data.name || attrs.vendor.data.documentId;
+                        } else if (attrs.vendor?.name) {
+                            vendorName = attrs.vendor.name;
+                        } else if (product.vendor?.name) {
+                            vendorName = product.vendor.name;
+                        }
+                        const vendor = vendorName;
+                        
+                        return `
+                            <div class="product-row">
+                                <img src="${imageUrl}" alt="${title}">
+                                <div style="flex: 1;">
+                                    <h5 style="margin: 0 0 5px 0;">${title}</h5>
+                                    <p style="margin: 0; color: #666; font-size: 14px;">
+                                        ${StrapiAPI.formatPrice(price)} | ${vendor} | Stock: ${stock}
+                                    </p>
+                                </div>
+                                <span class="badge ${publishedAt ? 'bg-success' : 'bg-warning'}">
+                                    ${publishedAt ? 'Published' : 'Draft'}
+                                </span>
+                            </div>
+                        `;
+                    }).join('');
+                }
+            } catch (error) {
+                console.error('Error loading dashboard stats:', error);
+                document.getElementById('totalProducts').textContent = 'Error';
+            }
+        }
+
+        function refreshStats() {
+            loadDashboardStats();
+        }
+
+        document.addEventListener('DOMContentLoaded', loadDashboardStats);
+    </script>
+</body>
+</html>

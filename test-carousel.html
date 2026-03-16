@@ -1,0 +1,169 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Carousel Debug</title>
+    <link rel="stylesheet" href="assets/css/bootstrap.min.css">
+    <link rel="stylesheet" href="assets/css/slick.css">
+    <link rel="stylesheet" href="assets/css/main.css">
+    <style>
+        body { padding: 20px; }
+        .debug-info { background: #f0f0f0; padding: 15px; margin: 20px 0; border-radius: 5px; }
+        .feature-item-wrapper { border: 2px solid red; min-height: 200px; }
+    </style>
+</head>
+<body>
+    <h1>Carousel Debug Test</h1>
+    
+    <div class="debug-info">
+        <h3>Debug Info:</h3>
+        <div id="debugOutput"></div>
+    </div>
+
+    <div class="feature" id="featureSection">
+        <div class="container container-lg">
+            <div class="position-relative arrow-center">
+                <div class="flex-align">
+                    <button type="button" id="feature-item-wrapper-prev" class="slick-prev slick-arrow flex-center rounded-circle bg-white text-xl hover-bg-main-600 hover-text-white transition-1">
+                        <i class="ph ph-caret-left"></i>
+                    </button>
+                    <button type="button" id="feature-item-wrapper-next" class="slick-next slick-arrow flex-center rounded-circle bg-white text-xl hover-bg-main-600 hover-text-white transition-1">
+                        <i class="ph ph-caret-right"></i>
+                    </button>
+                </div>
+                <div class="feature-item-wrapper">
+                    <!-- Categories will be loaded here -->
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="assets/js/jquery-3.6.0.min.js"></script>
+    <script src="assets/js/slick.min.js"></script>
+    <script src="assets/js/strapi-api.js"></script>
+    
+    <script>
+        const debugOutput = document.getElementById('debugOutput');
+        
+        function log(message) {
+            console.log(message);
+            debugOutput.innerHTML += `<p>${message}</p>`;
+        }
+        
+        async function testCarousel() {
+            log('Starting carousel test...');
+            
+            // Check if jQuery is loaded
+            if (typeof $ === 'undefined') {
+                log('❌ jQuery not loaded!');
+                return;
+            }
+            log('✅ jQuery loaded');
+            
+            // Check if Slick is loaded
+            if (typeof $.fn.slick === 'undefined') {
+                log('❌ Slick not loaded!');
+                return;
+            }
+            log('✅ Slick loaded');
+            
+            // Check if StrapiAPI is loaded
+            if (typeof StrapiAPI === 'undefined') {
+                log('❌ StrapiAPI not loaded!');
+                return;
+            }
+            log('✅ StrapiAPI loaded');
+            
+            // Fetch categories
+            log('Fetching categories...');
+            const categories = await StrapiAPI.getCategories({
+                'filters[featured][$eq]': true
+            });
+            
+            log(`Found ${categories.data?.length || 0} featured categories`);
+            
+            const wrapper = document.querySelector('.feature-item-wrapper');
+            
+            if (!wrapper) {
+                log('❌ Wrapper element not found!');
+                return;
+            }
+            log('✅ Wrapper element found');
+            
+            if (!categories.data || categories.data.length === 0) {
+                log('❌ No categories to display');
+                wrapper.innerHTML = '<p class="text-center">No featured categories</p>';
+                return;
+            }
+            
+            // Generate HTML
+            log('Generating HTML...');
+            wrapper.innerHTML = categories.data.map(cat => {
+                const attrs = cat.attributes || cat;
+                const name = attrs.name || cat.name;
+                const slug = attrs.slug || cat.slug;
+                return `
+                    <div class="feature-item text-center">
+                        <div class="feature-item__thumb rounded-circle">
+                            <a href="shop.html?category=${slug}" class="w-100 h-100 flex-center">
+                                <img src="assets/images/thumbs/feature-img1.png" alt="${name}">
+                            </a>
+                        </div>
+                        <div class="feature-item__content mt-16">
+                            <h6 class="text-lg mb-8"><a href="shop.html?category=${slug}" class="text-inherit">${name}</a></h6>
+                            <span class="text-sm text-gray-400">Category</span>
+                        </div>
+                    </div>
+                `;
+            }).join('');
+            
+            log('HTML generated, wrapper innerHTML length: ' + wrapper.innerHTML.length);
+            log('Wrapper has ' + wrapper.children.length + ' children');
+            
+            // Initialize Slick
+            log('Initializing Slick carousel...');
+            try {
+                const $wrapper = $('.feature-item-wrapper');
+                
+                if ($wrapper.hasClass('slick-initialized')) {
+                    log('Destroying existing Slick instance...');
+                    $wrapper.slick('unslick');
+                }
+                
+                $wrapper.slick({
+                    slidesToShow: 6,
+                    slidesToScroll: 1,
+                    autoplay: true,
+                    autoplaySpeed: 2000,
+                    speed: 1500,
+                    dots: false,
+                    pauseOnHover: true,
+                    arrows: true,
+                    prevArrow: '#feature-item-wrapper-prev',
+                    nextArrow: '#feature-item-wrapper-next',
+                    responsive: [
+                        { breakpoint: 1599, settings: { slidesToShow: 5 } },
+                        { breakpoint: 1399, settings: { slidesToShow: 4 } },
+                        { breakpoint: 992, settings: { slidesToShow: 3 } },
+                        { breakpoint: 575, settings: { slidesToShow: 2 } }
+                    ]
+                });
+                
+                log('✅ Slick carousel initialized successfully!');
+                log('Carousel is visible: ' + ($wrapper.is(':visible') ? 'YES' : 'NO'));
+                log('Carousel height: ' + $wrapper.height() + 'px');
+                
+            } catch (error) {
+                log('❌ Error initializing Slick: ' + error.message);
+                console.error(error);
+            }
+        }
+        
+        // Run test when page loads
+        window.addEventListener('load', function() {
+            setTimeout(testCarousel, 500);
+        });
+    </script>
+</body>
+</html>

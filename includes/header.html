@@ -1,0 +1,165 @@
+<!-- ==================== Header Start Here ==================== -->
+<header class="header-section">
+    <div class="header-top bg-color-one">
+        <div class="container container-lg">
+            <div class="header-top__inner flex-between">
+                <ul class="header-top__list">
+                    <li class="header-top__item">
+                        <a href="tel:+254700000000" class="header-top__link"><i class="ph ph-phone"></i> +254 700 000 000</a>
+                    </li>
+                    <li class="header-top__item">
+                        <a href="mailto:info@globosales.com" class="header-top__link"><i class="ph ph-envelope"></i> info@globosales.com</a>
+                    </li>
+                </ul>
+                <ul class="header-top__list">
+                    <li class="header-top__item">
+                        <a href="account.html" class="header-top__link"><i class="ph ph-user-circle"></i> My Account</a>
+                    </li>
+                    <li class="header-top__item">
+                        <a href="cart.html" class="header-top__link"><i class="ph ph-shopping-cart"></i> Cart</a>
+                    </li>
+                </ul>
+            </div>
+        </div>
+    </div>
+
+    <div class="header-middle bg-color-neutral">
+        <div class="container container-lg">
+            <nav class="header-inner flex-between">
+                <!-- Logo -->
+                <div class="logo">
+                    <a href="index.html" class="link">
+                        <img src="assets/images/logo/globosaleslogo.png" alt="Globosales" class="logo-dark" style="max-height: 60px;">
+                        <img src="assets/images/logo/globosaleslogo-light.png" alt="Globosales" class="logo-light" style="max-height: 60px;">
+                    </a>
+                </div>
+
+                <!-- Search Bar -->
+                <form action="shop.html" class="flex-align flex-grow-1 mx-5">
+                    <div class="search-box w-100">
+                        <input type="text" class="common-input common-input--lg pill" placeholder="Search for agricultural products..." name="search">
+                        <button type="submit" class="btn btn-main btn-icon icon border-0">
+                            <i class="ph ph-magnifying-glass"></i>
+                        </button>
+                    </div>
+                </form>
+
+                <!-- Header Actions -->
+                <div class="header-right flex-align">
+                    <a href="wishlist.html" class="header-right__button position-relative">
+                        <i class="ph ph-heart"></i>
+                        <span class="badge">0</span>
+                    </a>
+                    <a href="cart.html" class="header-right__button position-relative">
+                        <i class="ph ph-shopping-cart-simple"></i>
+                        <span class="badge">0</span>
+                    </a>
+                </div>
+            </nav>
+        </div>
+    </div>
+
+    <!-- Navigation Menu -->
+    <div class="header-nav bg-main-600">
+        <div class="container container-lg">
+            <div class="header-nav__inner flex-between">
+                <!-- Category Dropdown -->
+                <div class="category-dropdown">
+                    <button class="category-dropdown__button flex-align gap-8">
+                        <span class="icon text-2xl d-xs-flex d-none"><i class="ph ph-dots-nine"></i></span>
+                        <span class="text-white">All Categories</span>
+                        <span class="arrow-icon text-xl d-xs-flex d-none"><i class="ph ph-caret-down"></i></span>
+                    </button>
+                    <div class="category-dropdown__content" id="categoryDropdown">
+                        <div class="text-center py-3">
+                            <div class="spinner-border spinner-border-sm text-main-600" role="status"></div>
+                            <p class="text-sm mt-2">Loading categories...</p>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Main Navigation -->
+                <nav class="header-menu">
+                    <ul class="nav-menu flex-align">
+                        <li class="nav-menu__item">
+                            <a href="index.html" class="nav-menu__link">Home</a>
+                        </li>
+                        <li class="nav-menu__item">
+                            <a href="shop.html" class="nav-menu__link">Shop</a>
+                        </li>
+                        <li class="nav-menu__item">
+                            <a href="about.html" class="nav-menu__link">About</a>
+                        </li>
+                        <li class="nav-menu__item">
+                            <a href="contact.html" class="nav-menu__link">Contact</a>
+                        </li>
+                        <li class="nav-menu__item">
+                            <a href="http://localhost:1337/admin" target="_blank" class="nav-menu__link">Vendor Login</a>
+                        </li>
+                    </ul>
+                </nav>
+
+                <!-- Mobile Menu Toggle -->
+                <button class="mobile-menu-toggle d-lg-none">
+                    <i class="ph ph-list"></i>
+                </button>
+            </div>
+        </div>
+    </div>
+</header>
+<!-- ==================== Header End Here ==================== -->
+
+<script>
+// Load categories dynamically
+async function loadHeaderCategories() {
+    try {
+        const categories = await StrapiAPI.getCategories();
+        const dropdown = document.getElementById('categoryDropdown');
+        
+        if (categories.data && categories.data.length > 0) {
+            dropdown.innerHTML = `
+                <ul class="category-list">
+                    ${categories.data.map(cat => {
+                        const attrs = cat.attributes || cat;
+                        const name = attrs.name || cat.name;
+                        const slug = attrs.slug || cat.slug;
+                        const icon = getCategoryIcon(name);
+                        return `
+                            <li class="category-list__item">
+                                <a href="shop.html?category=${slug}" class="category-list__link flex-align gap-8">
+                                    <span class="icon text-xl"><i class="ph ${icon}"></i></span>
+                                    <span>${name}</span>
+                                </a>
+                            </li>
+                        `;
+                    }).join('')}
+                </ul>
+            `;
+        } else {
+            dropdown.innerHTML = '<p class="text-center py-3 text-sm">No categories available</p>';
+        }
+    } catch (error) {
+        console.error('Error loading categories:', error);
+        document.getElementById('categoryDropdown').innerHTML = '<p class="text-center py-3 text-sm text-danger">Failed to load categories</p>';
+    }
+}
+
+// Get appropriate icon for category
+function getCategoryIcon(categoryName) {
+    const name = categoryName.toLowerCase();
+    if (name.includes('seed') || name.includes('plant')) return 'ph-plant';
+    if (name.includes('fertilizer') || name.includes('soil')) return 'ph-drop';
+    if (name.includes('tool') || name.includes('equipment')) return 'ph-wrench';
+    if (name.includes('crop') || name.includes('grain')) return 'ph-wheat';
+    if (name.includes('livestock') || name.includes('animal')) return 'ph-horse';
+    if (name.includes('irrigation') || name.includes('water')) return 'ph-shower';
+    if (name.includes('pesticide') || name.includes('chemical')) return 'ph-flask';
+    if (name.includes('organic')) return 'ph-leaf';
+    return 'ph-package';
+}
+
+// Load categories when DOM is ready
+if (typeof StrapiAPI !== 'undefined') {
+    document.addEventListener('DOMContentLoaded', loadHeaderCategories);
+}
+</script>

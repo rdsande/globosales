@@ -1,0 +1,186 @@
+<!-- ======================= Middle Top Start ========================= -->
+<div class="header-top bg-main-600 flex-between">
+    <div class="container container-lg">
+        <div class="flex-between flex-wrap gap-8">
+            <ul class="flex-align flex-wrap d-none d-md-flex">
+                <li class="border-right-item"><a href="http://localhost:1337/admin" class="text-white text-sm hover-text-decoration-underline">Become A Seller</a></li>
+                <li class="border-right-item"><a href="about.html" class="text-white text-sm hover-text-decoration-underline">About us</a></li>
+                <li class="border-right-item"><a href="shop.html" class="text-white text-sm hover-text-decoration-underline">Free Delivery</a></li>
+                <li class="border-right-item"><a href="shop.html" class="text-white text-sm hover-text-decoration-underline">Returns Policy</a></li>
+            </ul>
+            <ul class="header-top__right flex-align flex-wrap">
+                <li class="on-hover-item border-right-item border-right-item-sm-space has-submenu arrow-white">
+                    <a href="javascript:void(0)" class="text-white text-sm py-8">Help Center</a>
+                    <ul class="on-hover-dropdown common-dropdown common-dropdown--sm max-h-200 scroll-sm px-0 py-8">
+                        <li class="nav-submenu__item">
+                            <a href="contact.html" class="nav-submenu__link hover-bg-gray-100 text-gray-500 text-xs py-6 px-16 flex-align gap-8 rounded-0"> 
+                                <span class="text-sm d-flex"><i class="ph ph-headset"></i></span>
+                                Call Center
+                            </a>
+                        </li>
+                        <li class="nav-submenu__item">
+                            <a href="contact.html" class="nav-submenu__link hover-bg-gray-100 text-gray-500 text-xs py-6 px-16 flex-align gap-8 rounded-0"> 
+                                <span class="text-sm d-flex"><i class="ph ph-chat-circle-dots"></i></span>
+                                Live Chat
+                            </a>
+                        </li>
+                    </ul>
+                </li>
+                <li class="border-right-item">
+                    <a href="account.html" class="text-white text-sm py-8 flex-align gap-6"> 
+                        <span class="icon text-md d-flex"> <i class="ph ph-user-circle"></i> </span> 
+                        <span class="hover-text-decoration-underline">My Account</span>
+                    </a>
+                </li>
+            </ul>
+        </div>
+    </div>
+</div>
+<!-- ======================= Middle Top End ========================= -->
+
+<!-- ======================= Middle Header Start ========================= -->
+<header class="header-middle bg-color-one border-bottom border-gray-100">
+    <div class="container container-lg">
+        <nav class="header-inner flex-between">
+            <!-- Logo Start -->
+            <div class="logo">
+                <a href="index.html" class="link">
+                    <img src="assets/images/logo/globosaleslogo.png" alt="Globosales" style="max-height: 60px;">
+                </a>
+            </div>
+            <!-- Logo End  -->
+
+            <!-- form location Start -->
+            <form action="shop.html" class="flex-align flex-wrap form-location-wrapper">
+                <div class="search-category d-flex h-48 select-border-end-0 radius-end-0 search-form d-sm-flex d-none">
+                    <select class="js-example-basic-single border border-gray-200 border-end-0" name="category" id="headerCategorySelect">
+                        <option value="" selected>All Categories</option>
+                        <!-- Categories will be loaded dynamically -->
+                    </select>
+    
+                    <div class="search-form__wrapper position-relative">
+                        <input type="text" name="search" class="search-form__input common-input py-13 ps-16 pe-18 rounded-end-pill pe-44" placeholder="Search for agricultural products...">
+                        <button type="submit" class="w-32 h-32 bg-main-600 rounded-circle flex-center text-xl text-white position-absolute top-50 translate-middle-y inset-inline-end-0 me-8"><i class="ph ph-magnifying-glass"></i></button>
+                    </div>
+                </div>
+            </form>
+            <!-- form location end -->
+             
+            <!-- Header Middle Right start -->
+            <div class="header-right flex-align d-lg-block d-none">
+                <div class="flex-align flex-wrap gap-12">
+                    <button type="button" class="search-icon flex-align d-lg-none d-flex gap-4 item-hover">
+                        <span class="text-2xl text-gray-700 d-flex position-relative item-hover__text">
+                            <i class="ph ph-magnifying-glass"></i>
+                        </span>
+                    </button>
+                    <a href="wishlist.html" class="flex-align gap-4 item-hover">
+                        <span class="text-2xl text-gray-700 d-flex position-relative me-6 mt-6 item-hover__text">
+                            <i class="ph ph-heart"></i>
+                            <span class="w-16 h-16 flex-center rounded-circle bg-main-600 text-white text-xs position-absolute top-n6 end-n4" id="wishlistCount">0</span>
+                        </span>
+                        <span class="text-md text-gray-500 item-hover__text d-none d-lg-flex">Wishlist</span>
+                    </a>
+                    <a href="cart.html" class="flex-align gap-4 item-hover">
+                        <span class="text-2xl text-gray-700 d-flex position-relative me-6 mt-6 item-hover__text">
+                            <i class="ph ph-shopping-cart-simple"></i>
+                            <span class="w-16 h-16 flex-center rounded-circle bg-main-600 text-white text-xs position-absolute top-n6 end-n4" id="cartCount">0</span>
+                        </span>
+                        <span class="text-md text-gray-500 item-hover__text d-none d-lg-flex">Cart</span>
+                    </a>
+                </div>
+            </div>
+            <!-- Header Middle Right End  -->
+        </nav>
+    </div>
+</header>
+<!-- ======================= Middle Header End ========================= -->
+
+<script>
+// Load categories into header dropdowns
+async function loadHeaderCategories() {
+    try {
+        // Wait for StrapiAPI to be available
+        if (typeof StrapiAPI === 'undefined') {
+            console.log('Waiting for StrapiAPI to load...');
+            setTimeout(loadHeaderCategories, 100);
+            return;
+        }
+        
+        console.log('Loading header categories...');
+        const categories = await StrapiAPI.getCategories();
+        
+        if (categories.data && categories.data.length > 0) {
+            console.log('Found', categories.data.length, 'categories for header');
+            
+            // Load into select dropdown
+            const selectElement = document.getElementById('headerCategorySelect');
+            if (selectElement) {
+                // Clear existing options except "All Categories"
+                while (selectElement.options.length > 1) {
+                    selectElement.remove(1);
+                }
+                
+                categories.data.forEach(cat => {
+                    const attrs = cat.attributes || cat;
+                    const name = attrs.name || cat.name;
+                    const slug = attrs.slug || cat.slug;
+                    const option = document.createElement('option');
+                    option.value = slug;
+                    option.textContent = name;
+                    selectElement.appendChild(option);
+                });
+                
+                console.log('Loaded', categories.data.length, 'categories into header select');
+                
+                // Reinitialize Select2 if it exists
+                if (typeof $.fn.select2 !== 'undefined') {
+                    $(selectElement).select2();
+                }
+            }
+            
+            // Load into category menu
+            const menuElement = document.getElementById('dynamicCategoryMenu');
+            if (menuElement) {
+                menuElement.innerHTML = categories.data.map(cat => {
+                    const attrs = cat.attributes || cat;
+                    const name = attrs.name || cat.name;
+                    const slug = attrs.slug || cat.slug;
+                    const icon = getCategoryIcon(name);
+                    return `
+                        <li class="common-dropdown__item nav-submenu__item">
+                            <a href="shop.html?category=${slug}" class="common-dropdown__link nav-submenu__link hover-bg-neutral-100">
+                                <span class="icon text-xl d-flex"><i class="ph ${icon}"></i></span>
+                                ${name}
+                            </a>
+                        </li>
+                    `;
+                }).join('');
+            }
+        } else {
+            console.log('No categories found');
+        }
+    } catch (error) {
+        console.error('Error loading header categories:', error);
+    }
+}
+
+function getCategoryIcon(categoryName) {
+    const name = categoryName.toLowerCase();
+    if (name.includes('seed') || name.includes('plant')) return 'ph-plant';
+    if (name.includes('fertilizer') || name.includes('soil')) return 'ph-drop';
+    if (name.includes('tool') || name.includes('equipment')) return 'ph-wrench';
+    if (name.includes('crop') || name.includes('grain')) return 'ph-wheat';
+    if (name.includes('livestock') || name.includes('animal')) return 'ph-horse';
+    if (name.includes('irrigation') || name.includes('water')) return 'ph-shower';
+    if (name.includes('pesticide') || name.includes('chemical')) return 'ph-flask';
+    if (name.includes('organic')) return 'ph-leaf';
+    return 'ph-package';
+}
+
+// Load categories when DOM is ready
+document.addEventListener('DOMContentLoaded', function() {
+    // Delay to ensure strapi-api.js is loaded
+    setTimeout(loadHeaderCategories, 500);
+});
+</script>

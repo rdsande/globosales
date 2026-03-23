@@ -34,9 +34,6 @@ logs/
 dist/
 build/
 
-# Strapi export (if generated locally)
-strapi-export.json
-
 # Backup files
 *.bak
 *.backup

@@ -2,92 +2,115 @@ async function loadProductDetails() {
   const urlParams = new URLSearchParams(window.location.search);
   const productId = urlParams.get('id');
   
+  console.log('[Product Details] Loading product with ID:', productId);
+  
   if (!productId) {
-    console.error('No product ID provided');
+    console.error('[Product Details] No product ID provided');
     return;
   }
   
-  const response = await StrapiAPI.getProduct(productId);
-  
-  if (!response || !response.data) {
-    console.error('Product not found');
-    return;
-  }
-  
-  const product = response.data;
-  const attrs = product.attributes;
-  
-  document.title = `${attrs.title} - Globosales`;
-  
-  const titleElement = document.querySelector('.product-details__title');
-  if (titleElement) {
-    titleElement.textContent = attrs.title;
-  }
-  
-  const priceElement = document.querySelector('.product-details__price');
-  if (priceElement) {
-    let priceHTML = '';
-    if (attrs.comparePrice && attrs.comparePrice > attrs.price) {
-      priceHTML += `<span class="text-gray-400 text-md fw-semibold text-decoration-line-through me-8">${StrapiAPI.formatPrice(attrs.comparePrice)}</span>`;
-    }
-    priceHTML += `<span class="text-heading text-2xl fw-bold">${StrapiAPI.formatPrice(attrs.price)}</span>`;
-    priceElement.innerHTML = priceHTML;
-  }
-  
-  const descriptionElement = document.querySelector('.product-details__description');
-  if (descriptionElement && attrs.description) {
-    descriptionElement.innerHTML = attrs.description;
-  }
-  
-  const images = attrs.images?.data || [];
-  if (images.length > 0) {
-    const mainImageElement = document.querySelector('.product-details__main-image');
-    if (mainImageElement) {
-      mainImageElement.src = StrapiAPI.getImageUrl(images[0].attributes);
+  try {
+    const response = await StrapiAPI.getProduct(productId);
+    
+    console.log('[Product Details] Full response:', response);
+    console.log('[Product Details] Response.data:', response?.data);
+    
+    if (!response || !response.data) {
+      console.error('[Product Details] Product not found - response:', response);
+      return;
     }
     
-    const thumbnailsContainer = document.querySelector('.product-details__thumbnails');
-    if (thumbnailsContainer) {
-      thumbnailsContainer.innerHTML = images.map((img, index) => `
-        <img src="${StrapiAPI.getImageUrl(img.attributes)}" 
-             alt="${attrs.title}" 
-             class="thumbnail ${index === 0 ? 'active' : ''}" 
-             onclick="changeMainImage('${StrapiAPI.getImageUrl(img.attributes)}')"
-             style="cursor: pointer; width: 80px; height: 80px; object-fit: cover; border: 2px solid ${index === 0 ? '#ff6b6b' : '#ddd'};">
-      `).join('');
+    // Strapi v5 returns flat structure without attributes wrapper
+    const product = response.data;
+    console.log('[Product Details] Product object:', product);
+    
+    console.log('[Product Details] Product loaded:', product.title);
+    
+    document.title = `${product.title} - Globosales`;
+    
+    // Update title - looking for h5 in product-details__content
+    const titleElement = document.querySelector('.product-details__content h5');
+    if (titleElement) {
+      titleElement.textContent = product.title;
+      console.log('[Product Details] Title updated');
+    } else {
+      console.warn('[Product Details] Title element not found');
     }
-  }
-  
-  const stockElement = document.querySelector('.product-details__stock');
-  if (stockElement) {
-    stockElement.textContent = attrs.stock > 0 ? `In Stock (${attrs.stock} available)` : 'Out of Stock';
-    stockElement.className = attrs.stock > 0 ? 'text-success' : 'text-danger';
-  }
-  
-  const vendorElement = document.querySelector('.product-details__vendor');
-  if (vendorElement && attrs.vendor?.data) {
-    vendorElement.textContent = `Sold by: ${attrs.vendor.data.attributes.name}`;
-  }
-  
-  const ratingElement = document.querySelector('.product-details__rating');
-  if (ratingElement && attrs.rating) {
-    ratingElement.innerHTML = `
-      <span class="text-warning-600">${'★'.repeat(Math.floor(attrs.rating))}${'☆'.repeat(5 - Math.floor(attrs.rating))}</span>
-      <span class="text-gray-500">(${attrs.reviewCount || 0} reviews)</span>
-    `;
+    
+    // Update price - looking for h4 in the price section
+    const priceContainer = document.querySelector('.product-details__content .flex-align.gap-8');
+    if (priceContainer) {
+      const h4 = priceContainer.querySelector('h4');
+      if (h4) {
+        h4.textContent = StrapiAPI.formatPrice(product.price);
+      }
+      const compareSpan = priceContainer.querySelector('.text-gray-500');
+      if (compareSpan && product.comparePrice && product.comparePrice > product.price) {
+        compareSpan.textContent = StrapiAPI.formatPrice(product.comparePrice);
+      } else if (compareSpan) {
+        compareSpan.style.display = 'none';
+      }
+      console.log('[Product Details] Price updated');
+    }
+    
+    // Update description - looking for p tag after title
+    const descriptionElement = document.querySelector('.product-details__content p.text-gray-700');
+    if (descriptionElement && product.description) {
+      descriptionElement.textContent = product.description;
+      console.log('[Product Details] Description updated');
+    }
+    
+    // Update main image
+    const images = product.images || [];
+    if (images.length > 0) {
+      const mainImageElement = document.querySelector('.product-details__thumb img');
+      if (mainImageElement) {
+        mainImageElement.src = StrapiAPI.getImageUrl(images[0]);
+        mainImageElement.alt = product.title;
+        console.log('[Product Details] Main image updated');
+      }
+      
+      // Update thumbnails if container exists
+      const thumbnailsContainer = document.querySelector('.product-details__images');
+      if (thumbnailsContainer) {
+        thumbnailsContainer.innerHTML = images.map((img, index) => `
+          <div class="max-w-120 max-h-120 h-120 flex-center border border-gray-100 rounded-16 p-8">
+            <img src="${StrapiAPI.getImageUrl(img)}" 
+                 alt="${product.title}" 
+                 class="thumbnail ${index === 0 ? 'active' : ''}" 
+                 onclick="changeMainImage('${StrapiAPI.getImageUrl(img)}')"
+                 style="cursor: pointer; max-width: 100%; max-height: 100%; object-fit: contain;">
+          </div>
+        `).join('');
+        console.log('[Product Details] Thumbnails updated');
+      }
+    }
+    
+    // Update breadcrumb
+    const breadcrumbProduct = document.querySelector('.breadcrumb li:last-child');
+    if (breadcrumbProduct) {
+      breadcrumbProduct.textContent = product.title;
+    }
+    
+    console.log('[Product Details] All updates complete');
+    
+  } catch (error) {
+    console.error('[Product Details] Error loading product:', error);
   }
 }
 
 function changeMainImage(imageUrl) {
-  const mainImageElement = document.querySelector('.product-details__main-image');
+  const mainImageElement = document.querySelector('.product-details__thumb img');
   if (mainImageElement) {
     mainImageElement.src = imageUrl;
   }
   
   document.querySelectorAll('.thumbnail').forEach(thumb => {
-    thumb.style.border = '2px solid #ddd';
+    thumb.style.opacity = '0.6';
   });
-  event.target.style.border = '2px solid #ff6b6b';
+  if (event && event.target) {
+    event.target.style.opacity = '1';
+  }
 }
 
 document.addEventListener('DOMContentLoaded', function() {

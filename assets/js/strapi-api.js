@@ -24,11 +24,28 @@ const StrapiAPI = {
 
   async getProduct(id) {
     try {
+      console.log('[StrapiAPI] Fetching product with ID:', id);
       const response = await fetch(`${STRAPI_API_URL}/products/${id}?populate=*`);
       const data = await response.json();
+      console.log('[StrapiAPI] Product response:', data);
+      
+      // Check if we got an error (documentId not found with numeric endpoint)
+      if (data.error) {
+        console.warn('[StrapiAPI] Error from API, trying with filters...', data.error);
+        // Try using filters for documentId
+        const filterResponse = await fetch(`${STRAPI_API_URL}/products?filters[documentId][$eq]=${id}&populate=*`);
+        const filterData = await filterResponse.json();
+        console.log('[StrapiAPI] Filter response:', filterData);
+        
+        if (filterData.data && filterData.data.length > 0) {
+          return { data: filterData.data[0] };
+        }
+        return null;
+      }
+      
       return data;
     } catch (error) {
-      console.error('Error fetching product:', error);
+      console.error('[StrapiAPI] Error fetching product:', error);
       return null;
     }
   },

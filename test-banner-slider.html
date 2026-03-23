@@ -1,0 +1,131 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Test Banner Slider</title>
+    <link rel="stylesheet" href="assets/css/slick.css">
+    <style>
+        .banner {
+            padding: 50px 0;
+        }
+        .banner-item {
+            min-height: 500px;
+            height: 100%;
+            position: relative;
+        }
+        .banner-bg-slider {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: 1;
+        }
+        .banner-bg-slide {
+            width: 100%;
+            height: 500px;
+            min-height: 500px;
+        }
+        .banner-bg-slide img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+        .banner-content-overlay {
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            display: flex;
+            align-items: center;
+            z-index: 2;
+        }
+        .banner-item__content {
+            color: white;
+            padding: 50px;
+        }
+        .slick-arrow {
+            position: absolute;
+            top: 50%;
+            transform: translateY(-50%);
+            z-index: 3;
+            background: white;
+            border: none;
+            width: 50px;
+            height: 50px;
+            border-radius: 50%;
+            cursor: pointer;
+        }
+        .slick-prev {
+            left: 20px;
+        }
+        .slick-next {
+            right: 20px;
+        }
+    </style>
+</head>
+<body>
+    <div class="banner">
+        <div class="container">
+            <div class="banner-item">
+                <!-- Static content overlay -->
+                <div class="banner-content-overlay">
+                    <div class="banner-item__content">
+                        <h1>Fresh Agricultural Products Delivered to Your Door</h1>
+                        <button>Explore Shop</button>
+                    </div>
+                </div>
+
+                <!-- Background image slider -->
+                <div class="banner-bg-slider">
+                    <div class="banner-bg-slide">
+                        <img src="assets/images/bg/banner-bg.png" alt="">
+                    </div>
+                    <div class="banner-bg-slide">
+                        <img src="assets/images/slides/slide1.jpg" alt="">
+                    </div>
+                    <div class="banner-bg-slide">
+                        <img src="assets/images/slides/slide2.jpg" alt="">
+                    </div>
+                    <div class="banner-bg-slide">
+                        <img src="assets/images/slides/slide3.jpg" alt="">
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="assets/js/jquery-3.6.0.min.js"></script>
+    <script src="assets/js/slick.min.js"></script>
+    <script>
+        $(document).ready(function() {
+            console.log('Initializing banner slider...');
+            console.log('Banner slider element:', $('.banner-bg-slider'));
+            console.log('Number of slides:', $('.banner-bg-slide').length);
+            
+            $('.banner-bg-slider').slick({
+                slidesToShow: 1,
+                slidesToScroll: 1,
+                autoplay: true,
+                autoplaySpeed: 4000,
+                speed: 1500,
+                dots: false,
+                pauseOnHover: true,
+                arrows: true,
+                draggable: true,
+                fade: true,
+                cssEase: 'linear',
+                infinite: true,
+                prevArrow: '<button type="button" class="slick-prev">Previous</button>',
+                nextArrow: '<button type="button" class="slick-next">Next</button>'
+            });
+            
+            console.log('Banner slider initialized');
+            
+            $('.banner-bg-slider').on('afterChange', function(event, slick, currentSlide) {
+                console.log('Slide changed to:', currentSlide);
+            });
+        });
+    </script>
+</body>
+</html>

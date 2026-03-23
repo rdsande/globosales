@@ -59,7 +59,8 @@
                     </select>
     
                     <div class="search-form__wrapper position-relative">
-                        <input type="text" name="search" class="search-form__input common-input py-13 ps-16 pe-18 rounded-end-pill pe-44" placeholder="Search for agricultural products...">
+                        <input type="text" name="search" id="headerSearchInput" class="search-form__input common-input py-13 ps-16 pe-18 rounded-end-pill pe-44" placeholder="Search for agricultural products..." autocomplete="off">
+                        <div id="searchAutocomplete" class="search-autocomplete position-absolute w-100 bg-white border border-gray-200 rounded-16 shadow-sm mt-2 d-none" style="top: 100%; z-index: 1000; max-height: 400px; overflow-y: auto;"></div>
                         <button type="submit" class="w-32 h-32 bg-main-600 rounded-circle flex-center text-xl text-white position-absolute top-50 translate-middle-y inset-inline-end-0 me-8"><i class="ph ph-magnifying-glass"></i></button>
                     </div>
                 </div>
@@ -102,20 +103,22 @@ async function loadHeaderCategories() {
     try {
         // Wait for StrapiAPI to be available
         if (typeof StrapiAPI === 'undefined') {
-            console.log('Waiting for StrapiAPI to load...');
+            console.log('[Header] Waiting for StrapiAPI to load...');
             setTimeout(loadHeaderCategories, 100);
             return;
         }
         
-        console.log('Loading header categories...');
+        console.log('[Header] Loading categories...');
         const categories = await StrapiAPI.getCategories();
+        console.log('[Header] Categories response:', categories);
         
         if (categories.data && categories.data.length > 0) {
-            console.log('Found', categories.data.length, 'categories for header');
+            console.log('[Header] Found', categories.data.length, 'categories');
             
             // Load into select dropdown
             const selectElement = document.getElementById('headerCategorySelect');
             if (selectElement) {
+                console.log('[Header] Select element found, loading categories...');
                 // Clear existing options except "All Categories"
                 while (selectElement.options.length > 1) {
                     selectElement.remove(1);
@@ -131,12 +134,22 @@ async function loadHeaderCategories() {
                     selectElement.appendChild(option);
                 });
                 
-                console.log('Loaded', categories.data.length, 'categories into header select');
+                console.log('[Header] Successfully loaded', categories.data.length, 'categories into select');
                 
-                // Reinitialize Select2 if it exists
-                if (typeof $.fn.select2 !== 'undefined') {
-                    $(selectElement).select2();
+                // Destroy and reinitialize Select2 if it exists
+                if (typeof $ !== 'undefined' && typeof $.fn.select2 !== 'undefined') {
+                    const $select = $(selectElement);
+                    if ($select.hasClass('select2-hidden-accessible')) {
+                        $select.select2('destroy');
+                    }
+                    $select.select2({
+                        placeholder: 'All Categories',
+                        allowClear: false
+                    });
+                    console.log('[Header] Select2 initialized');
                 }
+            } else {
+                console.error('[Header] Select element not found!');
             }
             
             // Load into category menu
@@ -158,11 +171,93 @@ async function loadHeaderCategories() {
                 }).join('');
             }
         } else {
-            console.log('No categories found');
+            console.log('[Header] No categories found in response');
         }
     } catch (error) {
-        console.error('Error loading header categories:', error);
+        console.error('[Header] Error loading categories:', error);
     }
+}
+
+// Search autocomplete functionality
+let searchTimeout;
+let allProducts = [];
+
+async function initSearchAutocomplete() {
+    const searchInput = document.getElementById('headerSearchInput');
+    const autocompleteDiv = document.getElementById('searchAutocomplete');
+    
+    if (!searchInput || !autocompleteDiv) return;
+    
+    // Load all products for autocomplete (cache them)
+    try {
+        const response = await StrapiAPI.getProducts({ pageSize: 100 });
+        allProducts = response.data || [];
+        console.log('[Search] Loaded', allProducts.length, 'products for autocomplete');
+    } catch (error) {
+        console.error('[Search] Error loading products:', error);
+    }
+    
+    searchInput.addEventListener('input', function(e) {
+        const query = e.target.value.trim();
+        
+        clearTimeout(searchTimeout);
+        
+        if (query.length < 2) {
+            autocompleteDiv.classList.add('d-none');
+            return;
+        }
+        
+        searchTimeout = setTimeout(() => {
+            showAutocomplete(query);
+        }, 300);
+    });
+    
+    // Hide autocomplete when clicking outside
+    document.addEventListener('click', function(e) {
+        if (!searchInput.contains(e.target) && !autocompleteDiv.contains(e.target)) {
+            autocompleteDiv.classList.add('d-none');
+        }
+    });
+}
+
+function showAutocomplete(query) {
+    const autocompleteDiv = document.getElementById('searchAutocomplete');
+    if (!autocompleteDiv) return;
+    
+    const lowerQuery = query.toLowerCase();
+    const matches = allProducts.filter(product => {
+        const attrs = product.attributes || product;
+        const title = (attrs.title || '').toLowerCase();
+        const description = (attrs.description || '').toLowerCase();
+        return title.includes(lowerQuery) || description.includes(lowerQuery);
+    }).slice(0, 8);
+    
+    if (matches.length === 0) {
+        autocompleteDiv.innerHTML = '<div class="p-16 text-center text-gray-500">No products found</div>';
+        autocompleteDiv.classList.remove('d-none');
+        return;
+    }
+    
+    autocompleteDiv.innerHTML = matches.map(product => {
+        const attrs = product.attributes || product;
+        const id = product.documentId || product.id;
+        const title = attrs.title || 'Untitled';
+        const price = attrs.price || 0;
+        const images = attrs.images?.data || [];
+        const imageUrl = images.length > 0 ? StrapiAPI.getImageUrl(images[0].attributes) : 'assets/images/thumbs/product-img1.png';
+        
+        return `
+            <a href="product-details.html?id=${id}" class="d-flex align-items-center gap-12 p-12 hover-bg-gray-50 text-decoration-none border-bottom border-gray-100">
+                <img src="${imageUrl}" alt="${title}" class="w-48 h-48 object-fit-cover rounded-8">
+                <div class="flex-grow-1">
+                    <h6 class="text-sm mb-4 text-gray-900">${title}</h6>
+                    <span class="text-main-600 fw-semibold">${StrapiAPI.formatPrice(price)}</span>
+                </div>
+            </a>
+        `;
+    }).join('');
+    
+    autocompleteDiv.classList.remove('d-none');
 }
 
 function getCategoryIcon(categoryName) {
@@ -178,9 +273,12 @@ function getCategoryIcon(categoryName) {
     return 'ph-package';
 }
 
-// Load categories when DOM is ready
-document.addEventListener('DOMContentLoaded', function() {
-    // Delay to ensure strapi-api.js is loaded
-    setTimeout(loadHeaderCategories, 500);
-});
+// Initialize immediately - StrapiAPI is already available at this point
+console.log('[Header] Script executing, StrapiAPI available:', typeof StrapiAPI !== 'undefined');
+if (typeof StrapiAPI !== 'undefined') {
+    loadHeaderCategories();
+    initSearchAutocomplete();
+} else {
+    console.error('[Header] StrapiAPI not available!');
+}
 </script>

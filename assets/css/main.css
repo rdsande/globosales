@@ -8196,7 +8196,7 @@ input:focus-visible {
 /* ================================= Header Css End =========================== */
 /* =========================== header Middle Css Start =============================== */
 .header-middle {
-    padding: 30px 0;
+    padding: 8px 0;
 }
 
 .header-middle.style-two {
@@ -8205,7 +8205,7 @@ input:focus-visible {
 
 @media screen and (max-width: 1399px) {
     .header-middle {
-        padding: 24px 0;
+        padding: 8px 0;
     }
 }
 
@@ -8741,10 +8741,10 @@ input:focus-visible {
 
 .banner-item {
     position: relative;
-    padding-block-start: clamp(2rem, -1.928rem + 8.183vw, 6.25rem);
-    padding-block-end: clamp(2rem, -8.859rem + 22.623vw, 13.75rem);
-    padding-inline-start: clamp(1rem, -11.87rem + 20.758vw, 8.875rem);
-    padding-inline-end: clamp(1rem, -5.129rem + 9.885vw, 4.75rem);
+    /* padding-block-start: clamp(2rem, -1.928rem + 8.183vw, 6.25rem); */
+    /* padding-block-end: clamp(2rem, -8.859rem + 22.623vw, 13.75rem); */
+    /* padding-inline-start: clamp(1rem, -11.87rem + 20.758vw, 8.875rem); */
+    /* padding-inline-end: clamp(1rem, -5.129rem + 9.885vw, 4.75rem); */
     -webkit-mask-image: url(../images/bg/banner-bg2.png);
     mask-image: url(../images/bg/banner-bg2.png);
     -webkit-mask-repeat: no-repeat;
@@ -9079,6 +9079,10 @@ input:focus-visible {
     .offer-card__thumb img {
         max-width: 163px;
     }
+}
+
+.banner {
+    margin-top: 10px !important;
 }
 /* ======================= Offer Css End =========================== */
 /* ===================================== Vendor Css Start ================================== */

@@ -165,30 +165,40 @@
 
   
   // ========================= Banner Slider Js Start ==============
-  $('.banner-slider').slick({
-    slidesToShow: 1,
-    slidesToScroll: 1,
-    autoplay: false,
-    autoplaySpeed: 2000,
-    speed: 1500,
-    dots: false,
-    pauseOnHover: true,
-    arrows: true,
-    draggable: true,
-    rtl: $('html').attr('dir') === 'rtl' ? true : false,
-    speed: 900,
-    infinite: true,
-    nextArrow: '#banner-next',
-    prevArrow: '#banner-prev',
-    responsive: [
-      {
-        breakpoint: 767,
-        settings: {
-          slidesToShow: 1,
+  if ($('.banner-bg-slider').length > 0) {
+    console.log('Banner slider element found, initializing...');
+    console.log('Number of slides:', $('.banner-bg-slide').length);
+    
+    $('.banner-bg-slider').slick({
+      slidesToShow: 1,
+      slidesToScroll: 1,
+      autoplay: true,
+      autoplaySpeed: 4000,
+      speed: 1500,
+      dots: false,
+      pauseOnHover: true,
+      arrows: true,
+      draggable: true,
+      fade: true,
+      cssEase: 'linear',
+      rtl: $('html').attr('dir') === 'rtl' ? true : false,
+      infinite: true,
+      nextArrow: '#banner-next',
+      prevArrow: '#banner-prev',
+      responsive: [
+        {
+          breakpoint: 767,
+          settings: {
+            slidesToShow: 1,
+          }
         }
-      }
-    ]
-  });  
+      ]
+    });
+    
+    console.log('Banner slider initialized successfully');
+  } else {
+    console.log('Banner slider element not found!');
+  }
   // ========================= Banner Slider Js End ===================
 
 

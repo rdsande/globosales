@@ -406,6 +406,62 @@ async function loadRecommendedProducts() {
     await loadProductsByCategory('all');
 }
 
+// Load promotional categories
+async function loadPromotionalCategories() {
+    try {
+        const categories = await StrapiAPI.getCategories({
+            'filters[featured][$eq]': true
+        });
+        
+        const container = document.getElementById('promotional-categories');
+        if (!container) {
+            console.log('Promotional categories container not found');
+            return;
+        }
+        
+        if (!categories.data || categories.data.length === 0) {
+            console.log('No featured categories for promotional section');
+            return;
+        }
+        
+        console.log('Loading promotional categories:', categories.data.length);
+        
+        // Use first 4 featured categories for promotional banners
+        const promoCategories = categories.data.slice(0, 4);
+        
+        // Array of background colors for variety
+        const bgColors = ['#E8F9E9', '#FCEDED', '#FFF5E1', '#E8F4FD'];
+        
+        container.innerHTML = promoCategories.map((cat, index) => {
+            const attrs = cat.attributes || cat;
+            const name = attrs.name || cat.name;
+            const slug = attrs.slug || cat.slug;
+            const image = attrs.image?.data?.attributes;
+            const imageUrl = image ? StrapiAPI.getImageUrl(image) : `assets/images/thumbs/promotional-banner-img${index + 1}.png`;
+            
+            return `
+                <div class="col-xl-3 col-sm-6 col-xs-6">
+                    <div class="promotional-banner-item position-relative rounded-24 overflow-hidden z-1">
+                        <img src="${imageUrl}" alt="${name}"
+                            class="position-absolute inset-block-start-0 inset-inline-start-0 w-100 h-100 object-fit-cover z-n1">
+                        <div class="promotional-banner-item__content">
+                            <h6 class="promotional-banner-item__title text-32">${name}</h6>
+                            <a href="shop.html?category=${slug}"
+                                class="btn btn-main d-inline-flex align-items-center rounded-pill gap-8 mt-24">
+                                Shop Now
+                                <span class="icon text-xl d-flex"><i class="ph ph-arrow-right"></i></span>
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            `;
+        }).join('');
+        
+    } catch (error) {
+        console.error('Error loading promotional categories:', error);
+    }
+}
+
 // Initialize homepage
 document.addEventListener('DOMContentLoaded', function() {
     if (window.location.pathname.includes('index.html') || window.location.pathname === '/' || window.location.pathname.endsWith('/globosales/')) {
@@ -424,6 +480,11 @@ document.addEventListener('DOMContentLoaded', function() {
         // Load featured category tabs and recommended products
         if (document.getElementById('pills-tab') && document.getElementById('pills-tabContent')) {
             loadFeaturedCategoryTabs();
+        }
+        
+        // Load promotional categories
+        if (document.getElementById('promotional-categories')) {
+            loadPromotionalCategories();
         }
     }
 });
